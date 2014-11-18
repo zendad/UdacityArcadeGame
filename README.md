@@ -1,6 +1,6 @@
-frontend-nanodegree-arcade-game
+#Frontend Nanodegree Arcade Game
 ===============================
 
-Students should use this rubric: https://www.udacity.com/course/viewer#!/c-ud015/l-3072058665/m-3072588797
+Arcade Game Project checked using rubric: https://www.udacity.com/course/viewer#!/c-ud015/l-3072058665/m-3072588797.
 
-for self-checking their submission.
+##How to Play Game
