@@ -23,7 +23,10 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime;
+        patterns = {},
+        lastTime,
+        rAfId,
+        collisionOccurred = false;
 
     canvas.width = 505;
     canvas.height = 606;
@@ -46,6 +49,12 @@ var Engine = (function(global) {
          * our update function since it may be used for smooth animation.
          */
         update(dt);
+
+        if (collisionOccurred) {
+            win.cancelAnimationFrame(rAfId);
+            return;
+        }
+
         render();
 
         /* Set our lastTime variable which is used to determine the time delta
@@ -56,7 +65,7 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
+        rAfId =win.requestAnimationFrame(main);
     };
 
     /* This function does some initial setup that should only occur once,
@@ -80,7 +89,21 @@ var Engine = (function(global) {
      */
     function update(dt) {
         updateEntities(dt);
-        // checkCollisions();
+        if (checkCollisions()) {
+            collisionOccurred = true;
+            if (win.confirm('Collision occurred! do you wanna start again?')) {
+                reset();
+                collisionOccurred = false;
+            }
+        }
+    }
+
+    function checkCollisions() {
+        return allEnemies.some(function (enemy) {
+            if (Math.floor(enemy.x) + 81 >= player.x && Math.floor(enemy.x) <= player.x + 81 && enemy.y === player.y) {
+                return true;
+            }
+        });
     }
 
     /* This is called by the update function  and loops through all of the
@@ -161,6 +184,7 @@ var Engine = (function(global) {
      */
     function reset() {
         // noop
+        global.resetGame();
     }
 
     /* Go ahead and load all of the images we know we're going to need to

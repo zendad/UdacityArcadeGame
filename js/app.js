@@ -1,7 +1,62 @@
+(function (global) {
+  'use strict';
+
+  function randomIntFromInterval(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }
+
+  var entitySize = {
+    w: 101,
+    h: 83
+  };
+  var canvasSize = {
+    top: 0,
+    left: 0,
+    right: 505,
+    bottom: (6 * entitySize.h) - 15
+  };
+
+  function handleMovementBoundaries(moveTo, currPos) {
+    switch (moveTo) {
+      case 'left':
+        console.log('move left');
+        currPos.x = currPos.x - entitySize.w >= canvasSize.left ? currPos.x - entitySize.w : currPos.x;
+        break;
+      case 'right':
+        console.log('move right');
+        currPos.x = currPos.x + entitySize.w < canvasSize.right ? currPos.x + entitySize.w : currPos.x;
+        break;
+      case 'up':
+        currPos.y = currPos.y - entitySize.h >= canvasSize.top ? currPos.y - entitySize.h : currPos.y;
+        console.log('move up');
+        break;
+      case 'down':
+        console.log('move down');
+        currPos.y = currPos.y + entitySize.h < canvasSize.bottom ? currPos.y + entitySize.h : currPos.y;
+        break;
+      default :
+        break;
+    }
+
+  }
+
+  function generateRandomPosition() {
+    return {
+      x: randomIntFromInterval(0, 4) * entitySize.w,  //canvas w 505
+      y: (randomIntFromInterval(1, 5) * entitySize.h) - 15  //canvas h 606
+    };
+  }
+
 // Enemies our player must avoid
 var Enemy = function() {
+    function Enemy(startPosition) {
+      if (Object.prototype.toString.call(startPosition) !== '[object Object]') {
+        startPosition = generateRandomPosition();
+      }
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
+    this.x = startPosition.x;
+    this.y = startPosition.y;
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
@@ -14,21 +69,64 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-}
+    if (this.x + entitySize.w > canvasSize.right + entitySize.w) {
+        this.x = -entitySize.w;
+        this.y = generateRandomPosition().y;
+        return;
+      }
+      this.x = this.x + (entitySize.w * dt);
+};
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-}
+};
+
+return Enemy;
+})();
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
+  var Player = (function (_super) {
+
+    var charImg = {
+      M: 'images/char-boy.png',
+      F: 'images/char-pink-girl.png'
+    };
 
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
+    function Player(gender) {
+
+      _super.call(this);
+    // The image/sprite for our player, this uses
+      // a helper we've provided to easily load images
+      this.sprite = Resources.get(charImg[gender || 'M']);
+
+      this.moved = false;
+      this.newPosition = {x: this.x, y: this.y};
+    }
+
+    // inheritance
+    Player.prototype = Object.create(_super.prototype);
+    Player.prototype.constructor = Player;
+
+    Player.prototype.update = function () {
+    };
+
+    Player.prototype.handleInput = function (moveTo) {
+      var currPos = {x: this.x, y: this.y};
+      handleMovementBoundaries(moveTo, currPos);
+      this.x = currPos.x;
+      this.y = currPos.y;
+      this.moved = true;
+      this.newPosition = currPos;
+    };
+    return Player;
+})(Enemy);
 
 
 
@@ -44,3 +142,27 @@ document.addEventListener('keyup', function(e) {
 
     player.handleInput(allowedKeys[e.keyCode]);
 });
+
+function init() {
+
+// Now instantiate your objects.
+// Place all enemy objects in an array called allEnemies
+    global.allEnemies = [
+      new Enemy(),
+      new Enemy(),
+      new Enemy(),
+      new Enemy(),
+      new Enemy()
+    ];
+// Place the player object in a variable called player
+    global.player = new Player('M');
+
+
+  }
+  global.resetGame = function(){
+    init();
+  };
+
+  //Resources.onReady(init);
+
+})(this);
