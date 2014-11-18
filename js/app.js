@@ -48,46 +48,50 @@
   }
 
 // Enemies our player must avoid
-var Enemy = function() {
+  var Enemy = (function () {
+
     function Enemy(startPosition) {
       if (Object.prototype.toString.call(startPosition) !== '[object Object]') {
         startPosition = generateRandomPosition();
       }
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
-    this.x = startPosition.x;
-    this.y = startPosition.y;
+      // Variables applied to each of our instances go here,
+      // we've provided one for you to get started
+      this.x = startPosition.x;
+      this.y = startPosition.y;
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
-    this.sprite = 'images/enemy-bug.png';
-}
+      // The image/sprite for our enemies, this uses
+      // a helper we've provided to easily load images
+      this.sprite = Resources.get('images/enemy-bug.png');
+    }
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
-Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
-    if (this.x + entitySize.w > canvasSize.right + entitySize.w) {
+    Enemy.prototype.update = function (dt) {
+      // You should multiply any movement by the dt parameter
+      // which will ensure the game runs at the same speed for
+      // all computers.
+      //var newPosition = generateRandomPosition();
+      //this.x = newPosition.x + (newPosition.x*dt);
+      //this.y = newPosition.y;
+      if (this.x + entitySize.w > canvasSize.right + entitySize.w) {
         this.x = -entitySize.w;
         this.y = generateRandomPosition().y;
         return;
       }
       this.x = this.x + (entitySize.w * dt);
-};
+    };
 
 // Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
+    Enemy.prototype.render = function () {
+      ctx.drawImage(this.sprite, this.x, this.y);
+    };
 
-return Enemy;
-})();
-
+    return Enemy;
+  })();
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
+
   var Player = (function (_super) {
 
     var charImg = {
@@ -95,14 +99,16 @@ return Enemy;
       F: 'images/char-pink-girl.png'
     };
 
-
-// Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
+    /**
+     * constructor takes gender as param, if none provided default is 'M' = male
+     * @param gender {String}
+     * @constructor
+     */
     function Player(gender) {
 
       _super.call(this);
-    // The image/sprite for our player, this uses
+
+      // The image/sprite for our player, this uses
       // a helper we've provided to easily load images
       this.sprite = Resources.get(charImg[gender || 'M']);
 
@@ -115,6 +121,11 @@ return Enemy;
     Player.prototype.constructor = Player;
 
     Player.prototype.update = function () {
+      /*if (this.moved) {
+        this.x = this.x + (this.newPosition.x * dt);
+        this.y = this.y + (this.newPosition.y * dt);
+        this.moved = false;
+      }*/
     };
 
     Player.prototype.handleInput = function (moveTo) {
@@ -124,26 +135,46 @@ return Enemy;
       this.y = currPos.y;
       this.moved = true;
       this.newPosition = currPos;
+      /*      switch (moveTo) {
+       case 'left':
+       console.log('move left');
+       this.x -= entitySize.w;
+       break;
+       case 'right':
+       console.log('move right');
+       this.x += entitySize.w;
+       break;
+       case 'up':
+       this.y -= entitySize.h;
+       console.log('move up');
+       break;
+       case 'down':
+       console.log('move down');
+       this.y += entitySize.h;
+       break;
+       default :
+       break;
+       }*/
     };
+
     return Player;
-})(Enemy);
-
-
+  })(Enemy);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
+  document.addEventListener('keyup', function (e) {
+
     var allowedKeys = {
-        37: 'left',
-        38: 'up',
-        39: 'right',
-        40: 'down'
+      37: 'left',
+      38: 'up',
+      39: 'right',
+      40: 'down'
     };
 
     player.handleInput(allowedKeys[e.keyCode]);
-});
+  });
 
-function init() {
+  function init() {
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
